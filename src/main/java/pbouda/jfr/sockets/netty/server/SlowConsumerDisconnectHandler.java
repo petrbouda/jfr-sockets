@@ -12,8 +12,7 @@ import java.net.SocketAddress;
 public class SlowConsumerDisconnectHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
-    public void write(ChannelHandlerContext context, Object obj, ChannelPromise promise) throws InterruptedException {
-
+    public void write(ChannelHandlerContext context, Object obj, ChannelPromise promise) {
         if ((obj instanceof TextWebSocketFrame) || (obj instanceof BinaryWebSocketFrame)) {
             if (context.channel().isWritable()) {
                 context.writeAndFlush(obj);
