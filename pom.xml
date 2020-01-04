@@ -46,6 +46,10 @@
                 <configuration>
                     <source>14</source>
                     <target>14</target>
+                    <compilerArgs>
+                        <arg>--add-exports</arg>
+                        <arg>jdk.jfr/jdk.jfr.internal.tool=ALL-UNNAMED</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>

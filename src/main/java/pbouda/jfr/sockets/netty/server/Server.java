@@ -6,8 +6,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.oio.OioEventLoopGroup;
+import io.netty.channel.socket.oio.OioServerSocketChannel;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import pbouda.jfr.sockets.NamedThreadFactory;
 
@@ -25,11 +25,13 @@ public class Server implements AutoCloseable {
     public Server() {
         this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
         // this.workerEventLoopGroup = new EpollEventLoopGroup();
-        this.workerEventLoopGroup = new NioEventLoopGroup(0, new NamedThreadFactory("server-nioEventLoopGroup"));
+        // this.workerEventLoopGroup = new NioEventLoopGroup(0, new NamedThreadFactory("server-nioEventLoopGroup"));
+        this.workerEventLoopGroup = new OioEventLoopGroup(0, new NamedThreadFactory("server-oioEventLoopGroup"));
 
         this.bootstrap = new ServerBootstrap()
                 // .channel(EpollServerSocketChannel.class)
-                .channel(NioServerSocketChannel.class)
+                // .channel(NioServerSocketChannel.class)
+                .channel(OioServerSocketChannel.class)
                 .group(workerEventLoopGroup)
                 .localAddress(8080)
                 // .handler(new LoggingHandler(LogLevel.INFO))

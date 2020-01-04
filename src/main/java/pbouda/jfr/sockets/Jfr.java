@@ -2,17 +2,18 @@ package pbouda.jfr.sockets;
 
 import jdk.jfr.Configuration;
 import jdk.jfr.consumer.EventStream;
-import jdk.jfr.consumer.RecordedStackTrace;
-import jdk.jfr.consumer.RecordedThread;
+import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedObject;
 import jdk.jfr.consumer.RecordingStream;
+import jdk.jfr.internal.tool.PrettyWriter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class Jfr {
 
@@ -28,7 +29,10 @@ public class Jfr {
         executor.submit(() -> {
             try (EventStream es = new RecordingStream(config)) {
                 for (String event : events) {
-                    es.onEvent(event, System.out::println);
+                    es.onEvent(event, e -> {
+                        String formatted = toString(e);
+                        System.out.println(formatted);
+                    });
                 }
 
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -42,5 +46,19 @@ public class Jfr {
                 es.start();
             }
         });
+    }
+
+    public static String toString(RecordedObject event) {
+        StringWriter s = new StringWriter();
+        PrintWriter writer = new PrintWriter(s);
+        PrettyWriter p = new PrettyWriter(writer);
+        p.setStackDepth(64);
+        if (event instanceof RecordedEvent) {
+            p.print((RecordedEvent) event);
+        } else {
+            p.print(event, "");
+        }
+        p.flush(true);
+        return s.toString();
     }
 }
