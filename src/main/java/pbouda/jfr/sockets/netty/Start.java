@@ -43,12 +43,16 @@ public class Start {
         // -----------------
         ChannelGroup channelGroup = server.getChannelGroup();
 
+        // Keep the content of the same size - 10 bytes
+        String message = "Rita Hayes";
+
+        int i = 0;
         while (true) {
             Thread.sleep(1000);
 
             ByteBuf buffer = PooledByteBufAllocator.DEFAULT.buffer();
-
-            String message = LOREM.getName();
+            // Different size of messages
+            // String message = LOREM.getName();
             buffer.writeCharSequence(message, CharsetUtil.UTF_8);
 
             channelGroup.write(new TextWebSocketFrame(buffer))
@@ -57,6 +61,14 @@ public class Start {
                             future.cause().printStackTrace();
                         }
                     });
+
+//            // Flush a bulk of 5 messages
+//            if (i == 4) {
+//                channelGroup.flush();
+//                i = 0;
+//            } else {
+//                i++;
+//            }
         }
     }
 }

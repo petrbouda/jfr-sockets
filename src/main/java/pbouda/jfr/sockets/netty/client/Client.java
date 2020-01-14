@@ -2,8 +2,9 @@ package pbouda.jfr.sockets.netty.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.channel.oio.OioEventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.socket.oio.OioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
@@ -32,8 +33,8 @@ public class Client implements AutoCloseable {
     }
 
     public Client() {
-        // this.group = new NioEventLoopGroup(0, new NamedThreadFactory("client-oioEventLoopGroup"));
-        this.group = new OioEventLoopGroup(0, new NamedThreadFactory("client-oioEventLoopGroup"));
+        this.group = new NioEventLoopGroup(0, new NamedThreadFactory("client-nioEventLoopGroup"));
+//        this.group = new OioEventLoopGroup(0, new NamedThreadFactory("client-oioEventLoopGroup"));
     }
 
     public Channel connect() throws InterruptedException {
@@ -44,9 +45,9 @@ public class Client implements AutoCloseable {
 
         Bootstrap bootstrap = new Bootstrap()
                 .group(group)
-                // .channel(EpollSocketChannel.class)
-                // .channel(NioSocketChannel.class)
-                .channel(OioSocketChannel.class)
+//                 .channel(EpollSocketChannel.class)
+                 .channel(NioSocketChannel.class)
+//                .channel(OioSocketChannel.class)
                 .handler(new CustomClientInitializer(wsHandshakeHandler));
 
         ChannelFuture channelFuture = bootstrap.connect(URI.getHost(), URI.getPort()).sync()

@@ -1,28 +1,35 @@
 package pbouda.jfr.sockets.simple;
 
-import com.thedeanda.lorem.Lorem;
-import com.thedeanda.lorem.LoremIpsum;
-import pbouda.jfr.sockets.Jfr;
-import pbouda.jfr.sockets.NamedThreadFactory;
+import jdk.jfr.Configuration;
+import jdk.jfr.consumer.EventStream;
+import jdk.jfr.consumer.RecordingStream;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.text.ParseException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Start {
 
-    private static final Lorem LOREM = LoremIpsum.getInstance();
+    public static void main(String[] args) throws IOException, InterruptedException, ParseException {
+        Configuration cfg = Configuration.create(Path.of("custom-profile.xml"));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try (EventStream es = new RecordingStream(cfg)) {
+                es.onEvent("jdk.SocketRead", System.out::println);
+                es.onEvent("jdk.SocketWrite", System.out::println);
+                es.start();
+            }
+        });
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        Jfr.start("jdk.SocketRead", "jdk.SocketWrite");
-
-        ExecutorService serverExecutor = Executors.newSingleThreadExecutor(new NamedThreadFactory("server-handler"));
+        ExecutorService serverExecutor = Executors.newSingleThreadExecutor();
         serverExecutor.submit(() -> {
-            try (ServerSocket ss = new ServerSocket(5056)) {
+            try (ServerSocket ss = new ServerSocket(5000)) {
                 while (true) {
                     Socket socket = ss.accept();
                     System.out.println("A new client is connected : " + socket);
@@ -31,9 +38,9 @@ public class Start {
             }
         });
 
-        Thread.sleep(3000);
+        Thread.sleep(2000);
 
-        try (var soc = new Socket("localhost", 5056);
+        try (var soc = new Socket("localhost", 5000);
              var dis = new DataInputStream(soc.getInputStream())) {
 
             while (true) {
@@ -55,8 +62,7 @@ public class Start {
             try (DataOutputStream dos = new DataOutputStream(socket.getOutputStream()); socket) {
                 while (true) {
                     Thread.sleep(1000);
-                    String message = LOREM.getName();
-                    dos.writeUTF(message);
+                    dos.writeUTF("my-message");
                 }
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
