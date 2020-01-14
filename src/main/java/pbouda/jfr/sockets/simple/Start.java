@@ -7,7 +7,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.ParseException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +26,7 @@ public class Start {
             "    </event>" +
             "</configuration>";
 
-    public static void main(String[] args) throws IOException, InterruptedException, ParseException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         Jfr.start(CONFIG, "jdk.SocketRead", "jdk.SocketWrite");
 
         ExecutorService serverExecutor = Executors.newSingleThreadExecutor();

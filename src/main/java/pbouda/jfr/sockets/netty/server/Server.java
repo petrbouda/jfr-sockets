@@ -7,9 +7,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.oio.OioServerSocketChannel;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import pbouda.jfr.sockets.NamedThreadFactory;
 
@@ -26,20 +24,20 @@ public class Server implements AutoCloseable {
 
     public Server() {
         this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
-        // this.workerEventLoopGroup = new EpollEventLoopGroup();
-         this.workerEventLoopGroup = new NioEventLoopGroup(0, new NamedThreadFactory("server-nioEventLoopGroup"));
+//         this.workerEventLoopGroup = new EpollEventLoopGroup(0, new NamedThreadFactory("server-epollEventLoopGroup"));
+        this.workerEventLoopGroup = new NioEventLoopGroup(0, new NamedThreadFactory("server-nioEventLoopGroup"));
 //        this.workerEventLoopGroup = new OioEventLoopGroup(0, new NamedThreadFactory("server-oioEventLoopGroup"));
 
-        this.bootstrap = new ServerBootstrap()
-                // .channel(EpollServerSocketChannel.class)
-                 .channel(NioServerSocketChannel.class)
+        this.bootstrap = new ServerBootstrap();
+//        this.bootstrap.channel(EpollServerSocketChannel.class);
+        this.bootstrap.channel(NioServerSocketChannel.class);
+        this.bootstrap.group(workerEventLoopGroup);
+        this.bootstrap.localAddress(8080);
+        this.bootstrap.childHandler(new RouterChannelInitializer(channelGroup));
 //                .channel(OioServerSocketChannel.class)
-                .group(workerEventLoopGroup)
-                .localAddress(8080)
-                // .handler(new LoggingHandler(LogLevel.INFO))
-                // .childOption(ChannelOption.SO_SNDBUF, 1024 * 1024)
-                // .childOption(ChannelOption.SO_RCVBUF, 32 * 1024)
-                .childHandler(new RouterChannelInitializer(channelGroup));
+// .handler(new LoggingHandler(LogLevel.INFO))
+// .childOption(ChannelOption.SO_SNDBUF, 1024 * 1024)
+// .childOption(ChannelOption.SO_RCVBUF, 32 * 1024)
 
         /*
          * The maximum queue length for incoming connection indications

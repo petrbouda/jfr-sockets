@@ -16,6 +16,7 @@ public class SlowConsumerDisconnectHandler extends ChannelOutboundHandlerAdapter
         if ((obj instanceof TextWebSocketFrame) || (obj instanceof BinaryWebSocketFrame)) {
             if (context.channel().isWritable()) {
                 context.writeAndFlush(obj);
+//                context.write(obj);
                 promise.setSuccess();
             } else {
                 // Implementation of Timeout for Writability and closing the connection

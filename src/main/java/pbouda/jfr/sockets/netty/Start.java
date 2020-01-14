@@ -58,7 +58,7 @@ public class Start {
         ChannelGroup channelGroup = server.getChannelGroup();
 
         // Keep the content of the same size - 10 bytes
-        String message = "Rita Hayes";
+        String message = "my-message";
 
         int i = 0;
         while (true) {
@@ -76,7 +76,7 @@ public class Start {
                         }
                     });
 
-//            // Flush a bulk of 5 messages
+            // Flush a bulk of 5 messages
 //            if (i == 4) {
 //                channelGroup.flush();
 //                i = 0;

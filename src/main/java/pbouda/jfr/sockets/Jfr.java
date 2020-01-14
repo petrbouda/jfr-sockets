@@ -24,13 +24,15 @@ public class Jfr {
             Files.write(config, configuration.getBytes());
             Configuration configFile = Configuration.create(config);
 
+            configFile.getSettings().forEach((key, value) -> System.out.println(key + ": " + value));
+
             ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("jfr"));
             executor.submit(() -> {
                 try (EventStream es = new RecordingStream(configFile)) {
                     for (String event : events) {
                         es.onEvent(event, e -> {
-                            String formatted = toString(e);
-                            System.out.println(formatted);
+                            // String formatted = toString(e);
+                            System.out.println(e);
                         });
                     }
 
@@ -50,17 +52,17 @@ public class Jfr {
         }
     }
 
-    public static String toString(RecordedObject event) {
-        StringWriter s = new StringWriter();
-        PrintWriter writer = new PrintWriter(s);
-        PrettyWriter p = new PrettyWriter(writer);
-        p.setStackDepth(64);
-        if (event instanceof RecordedEvent) {
-            p.print((RecordedEvent) event);
-        } else {
-            p.print(event, "");
-        }
-        p.flush(true);
-        return s.toString();
-    }
+//    public static String toString(RecordedObject event) {
+//        StringWriter s = new StringWriter();
+//        PrintWriter writer = new PrintWriter(s);
+//        PrettyWriter p = new PrettyWriter(writer);
+//        p.setStackDepth(64);
+//        if (event instanceof RecordedEvent) {
+//            p.print((RecordedEvent) event);
+//        } else {
+//            p.print(event, "");
+//        }
+//        p.flush(true);
+//        return s.toString();
+//    }
 }
