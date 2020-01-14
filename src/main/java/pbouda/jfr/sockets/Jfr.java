@@ -10,6 +10,7 @@ import jdk.jfr.internal.tool.PrettyWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.concurrent.ExecutorService;
@@ -17,35 +18,36 @@ import java.util.concurrent.Executors;
 
 public class Jfr {
 
-    public static void start(String... events) {
-        Configuration config;
+    public static void start(String configuration, String... events) {
         try {
-            config = Configuration.create(Path.of("custom-profile.xml"));
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
+            Path config = Files.createTempFile(null, ".xml");
+            Files.write(config, configuration.getBytes());
+            Configuration configFile = Configuration.create(config);
 
-        ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("jfr"));
-        executor.submit(() -> {
-            try (EventStream es = new RecordingStream(config)) {
-                for (String event : events) {
-                    es.onEvent(event, e -> {
-                        String formatted = toString(e);
-                        System.out.println(formatted);
-                    });
-                }
-
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    try {
-                        es.awaitTermination();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("jfr"));
+            executor.submit(() -> {
+                try (EventStream es = new RecordingStream(configFile)) {
+                    for (String event : events) {
+                        es.onEvent(event, e -> {
+                            String formatted = toString(e);
+                            System.out.println(formatted);
+                        });
                     }
-                }));
 
-                es.start();
-            }
-        });
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        try {
+                            es.awaitTermination();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }));
+
+                    es.start();
+                }
+            });
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException("Cannot create a configuration file", e);
+        }
     }
 
     public static String toString(RecordedObject event) {

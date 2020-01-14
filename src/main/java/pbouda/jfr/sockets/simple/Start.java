@@ -1,31 +1,34 @@
 package pbouda.jfr.sockets.simple;
 
-import jdk.jfr.Configuration;
-import jdk.jfr.consumer.EventStream;
-import jdk.jfr.consumer.RecordingStream;
+import pbouda.jfr.sockets.Jfr;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Start {
 
+    private static final String CONFIG =
+            "<configuration version=\"2.0\">" +
+            "    <event name=\"jdk.SocketRead\">\n" +
+            "        <setting name=\"enabled\">true</setting>\n" +
+            "        <setting name=\"stackTrace\">true</setting>\n" +
+            "        <setting name=\"threshold\" control=\"socket-io-threshold\">0 s</setting>\n" +
+            "    </event>\n" +
+            "    <event name=\"jdk.SocketWrite\">\n" +
+            "        <setting name=\"enabled\">true</setting>\n" +
+            "        <setting name=\"stackTrace\">true</setting>\n" +
+            "        <setting name=\"threshold\" control=\"socket-io-threshold\">0 s</setting>\n" +
+            "    </event>" +
+            "</configuration>";
+
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
-        Configuration cfg = Configuration.create(Path.of("custom-profile.xml"));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            try (EventStream es = new RecordingStream(cfg)) {
-                es.onEvent("jdk.SocketRead", System.out::println);
-                es.onEvent("jdk.SocketWrite", System.out::println);
-                es.start();
-            }
-        });
+        Jfr.start(CONFIG, "jdk.SocketRead", "jdk.SocketWrite");
 
         ExecutorService serverExecutor = Executors.newSingleThreadExecutor();
         serverExecutor.submit(() -> {

@@ -15,8 +15,22 @@ public class Start {
 
     private static final Lorem LOREM = LoremIpsum.getInstance();
 
+    private static final String CONFIG =
+            "<configuration version=\"2.0\">"+
+            "    <event name=\"jdk.SocketRead\">\n" +
+            "        <setting name=\"enabled\">true</setting>\n" +
+            "        <setting name=\"stackTrace\">true</setting>\n" +
+            "        <setting name=\"threshold\" control=\"socket-io-threshold\">0 s</setting>\n" +
+            "    </event>\n" +
+            "    <event name=\"jdk.SocketWrite\">\n" +
+            "        <setting name=\"enabled\">true</setting>\n" +
+            "        <setting name=\"stackTrace\">true</setting>\n" +
+            "        <setting name=\"threshold\" control=\"socket-io-threshold\">0 s</setting>\n" +
+            "    </event>" +
+            "</configuration>";
+
     public static void main(String[] args) throws InterruptedException {
-        Jfr.start("jdk.SocketRead", "jdk.SocketWrite");
+        Jfr.start(CONFIG, "jdk.SocketRead", "jdk.SocketWrite");
 
         // ------------------
         //  Websocket Server
